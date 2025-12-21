@@ -13,8 +13,3 @@ Thumbs.db
 *.tmp
 *.log
 
-# Release archives (should not be in repo, only attached to GitHub releases)
-*.tar.gz
-templates-*.tar.gz
-RELEASE_INSTRUCTIONS.md
-
