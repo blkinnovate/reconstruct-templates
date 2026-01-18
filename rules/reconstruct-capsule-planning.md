@@ -1,105 +1,130 @@
 ---
-version: v0.2
+version: v0.3
 ---
 
-# Capsule Plan Creation Rules
+# Capsule Plan Format
 
-Create implementation plans for capsules. Explore codebase, ask only when necessary, create plan, confirm with user.
+Create implementation plans that agents can execute.
 
-## Workflow
+## Plan Template
 
-### 1. Context Gathering
-
-- Read user request
-- Check `.reconstruct/preferences.json` for `project_id`
-- Call `get_project_capsules` to see existing work
-- Call `get_master_context_sections` for project docs
-
-### 2. Codebase Exploration
-
-- Use `codebase_search` for semantic queries
-- Use `read_file` for discovered files
-- Identify patterns, conventions, dependencies
-
-### 3. Question Strategy
-
-**Ask ONLY when:** Requirements ambiguous, multiple approaches exist, critical info missing.
-
-**Don't ask if:** Info in codebase, standard patterns exist, can infer from context.
-
-### 4. Plan Creation
-
-**Execution Type:**
-- **Single-step:** Self-contained, no dependencies, one response
-- **Multi-step:** Sequential steps, user confirmation needed between steps
-
-**YAML Frontmatter:**
-```yaml
+```markdown
 ---
 capsule_ref: "[Capsule name or ID]"
 execution_type: "[single-step|multi-step]"
 ---
+
+## Objective
+[1-2 sentences: what will be accomplished]
+
+## Instructions
+
+### For single-step:
+- Bullet list of what to do
+- Complete all in one response
+- No user confirmation needed between items
+
+### For multi-step:
+1. Step 1: [description]
+   - Sub-tasks...
+   **AWAIT USER CONFIRMATION**
+
+2. Step 2: [description]
+   - Sub-tasks...
+   **AWAIT USER CONFIRMATION**
+
+## Expected Output
+- [Files created/modified]
+- [Functionality delivered]
+
+## Progress Updates
+- Report after each step (multi-step only)
+- Report at completion (all types)
 ```
 
-**Required Sections:**
-1. `## Objective` - What will be accomplished
-2. `## Instructions` - Steps or bullets
-   - Single-step: bullets, "Complete all in one response"
-   - Multi-step: numbered, "AWAIT USER CONFIRMATION between steps"
-3. `## Expected Output` - Deliverables/files/changes
-4. `## Progress Updates` - What to report via `report_capsule_progress`
+---
 
-### 5. Confirmation
-
-Present summary:
-```
-**Capsule:** [name]
-**Type:** [single-step|multi-step]
-**Key Work:** [2-3 sentences]
-**Files:** [key paths]
-
-Confirm? (yes/no)
-```
-
-Wait for "yes" → save to `.reconstruct/temp/capsule-plan-[timestamp].md`
-
-## Progress Reporting
-
-**During Implementation (Multi-Step):**
-
-After each step, call `report_capsule_progress`:
-```json
-{
-  "session_id": "uuid",
-  "capsule_id": "uuid",
-  "status": "in_progress",
-  "progress": {
-    "summary": "Completed step N",
-    "files_modified": ["path/to/file.ts"]
-  }
-}
-```
-
-**At Completion:**
-
-Call `report_capsule_progress` with `status: "completed"`.
-
-Update task via `update_project_task` with `status: "Done"`.
-
-## Decision Guide
+## Execution Type Decision
 
 | Scenario | Type |
 |----------|------|
-| Simple change, no deps | single-step |
-| User confirmation needed | multi-step |
+| < 3 file changes, no deps | single-step |
 | Sequential dependencies | multi-step |
-| Complex validation | multi-step |
+| Needs intermediate validation | multi-step |
+| Complex or risky changes | multi-step |
+| User explicitly wants control | multi-step |
 
-## Quality Check
+---
 
-Before presenting:
-- [ ] Frontmatter complete
-- [ ] All sections present
-- [ ] Instructions specific + actionable
-- [ ] File paths accurate
-- [ ] Progress updates defined
+## Context Gathering (Before Planning)
+
+1. **Check existing capsules:** `get_project_capsules`
+2. **Check project docs:** `get_master_context_sections` (if available)
+3. **Quick codebase scan:** `codebase_search` for related code
+4. **Read key files:** Understand patterns and conventions
+
+**Ask questions ONLY if:**
+- Requirements genuinely ambiguous
+- Multiple valid approaches exist
+- Critical information missing from codebase
+
+---
+
+## Plan Confirmation
+
+Before storing plan, present summary:
+
+```
+📋 Plan Summary
+
+Capsule: [name]
+Type: [single-step|multi-step]
+Objective: [1-2 sentences]
+Key files: [main paths]
+Steps: [count]
+
+Approve? (yes/no)
+```
+
+**Wait for "yes"** → Save to `.reconstruct/temp/capsule-plan-[timestamp].md`
+
+---
+
+## Quality Checklist
+
+Before presenting plan:
+
+- [ ] Frontmatter has `capsule_ref` + `execution_type`
+- [ ] Objective is clear and measurable
+- [ ] Instructions are specific (file paths, function names)
+- [ ] Expected output is concrete
+- [ ] Multi-step has `**AWAIT USER CONFIRMATION**` markers
+- [ ] File paths are accurate (verified via codebase search)
+
+---
+
+## Common Patterns
+
+**Feature Addition:**
+```
+1. Add types/interfaces
+2. Implement core logic
+3. Add UI components
+4. Wire up and test
+```
+
+**Bug Fix:**
+```
+1. Reproduce and locate issue
+2. Implement fix
+3. Add regression test
+4. Verify fix
+```
+
+**Refactor:**
+```
+1. Identify all usages
+2. Create new abstraction
+3. Migrate usages incrementally
+4. Remove old code
+```

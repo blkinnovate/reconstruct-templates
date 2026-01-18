@@ -10,14 +10,44 @@ This repository contains the command and rule templates that are distributed via
 
 ```
 reconstruct-templates/
-├── commands/          # Cursor command files
-│   ├── recon-init.md
-│   ├── recon-implement.md
-│   └── recon-sync.md
-├── rules/             # Cursor rule files
-│   └── reconstruct-task-planning.md
+├── commands/                          # Cursor command files
+│   ├── recon-setup.md                 # One-time project setup + tutorial
+│   ├── recon-manager.md               # Manager agent: plan work, create capsules
+│   ├── recon-worker.md                # Worker agent: execute plans
+│   └── recon-help.md                  # Tutorial and reference
+├── rules/                             # Cursor rule files
+│   ├── reconstruct-capsule-planning.md   # Plan format and creation
+│   ├── reconstruct-state-machine.md      # Workflow state detection
+│   └── reconstruct-recovery.md           # Error recovery guide
 ├── LICENSE
 └── README.md
+```
+
+## Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/recon-setup` | Connect workspace to project (run once) |
+| `/recon-manager` | Manager agent: create capsules, plan work |
+| `/recon-worker` | Worker agent: execute plans with human approval |
+| `/recon-help` | Tutorial and quick reference |
+
+## Rules
+
+| Rule | Purpose |
+|------|---------|
+| `reconstruct-capsule-planning` | Plan format template and creation workflow |
+| `reconstruct-state-machine` | Detect workflow state and suggest next action |
+| `reconstruct-recovery` | Error recovery steps for common issues |
+
+## Typical Workflow
+
+```
+1. /recon-setup       → Connect to project (one-time)
+2. /recon-manager     → Describe work, create capsule + plan
+3. Open new chat
+4. /recon-worker      → Execute the plan with approvals
+5. Return to manager chat, say "done"
 ```
 
 ## Installation
@@ -31,7 +61,9 @@ reconstruct init
 
 ## Versioning
 
-Templates are versioned independently from the CLI. Each release includes:
+Templates are versioned independently from the CLI. Current version: **v0.3**
+
+Each release includes:
 - Command files with version headers
 - Rule files with version headers
 - A `templates-{version}.tar.gz` archive
@@ -40,13 +72,7 @@ Templates are versioned independently from the CLI. Each release includes:
 
 See [LICENSE](LICENSE) for license terms. This work is licensed under a custom license that permits personal and non-commercial use. Commercial use requires explicit permission.
 
-## Contributing
-
-This repository is maintained as part of the Reconstruct project. For issues or feature requests, please contact the maintainers.
-
 ## Links
 
 - [Reconstruct Website](https://reconstruct.app)
 - [Reconstruct CLI](https://github.com/blkinnovate/reconstruct-cli)
-- [Main Repository](https://github.com/blkinnovate/reconstruct)
-
