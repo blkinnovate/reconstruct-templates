@@ -61,7 +61,7 @@ reconstruct init
 
 ## Versioning
 
-Templates are versioned independently from the CLI. Current version: **v0.3**
+Templates are versioned independently from the CLI. Current version: **v0.4**
 
 Each release includes:
 - Command files with version headers
