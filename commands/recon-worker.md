@@ -20,14 +20,22 @@ Execute capsule plan. Human approves changes. Validate before proceeding.
    - Multiple? → Ask which to use
    → Extract session_id
 
-3. Get plan_id from session's manager_context.active_plan_id
+3. Extract capsule_id from session.linked_capsules
+   - Use the capsule linked to this session (typically from submit_capsule_plan)
+   - If multiple: use first non-archived, or match plan's capsule_ref
+
+4. Get plan_id from session's manager_context.active_plan_id
    - No plan? → "❌ Return to manager session"
 
-4. Call get_task_plan with session_id
+5. Call get_task_plan with session_id
    → Extract plan content, execution_type
 
-5. Call get_capsule_context with session_id + capsule_id
+6. Call get_capsule_context(session_id, capsule_id)
+   - capsule_id comes from session.linked_capsules (step 3)
    → Extract: allowed_paths, forbidden_paths, guardrails
+
+RULE: NEVER call get_project_capsules. Session provides the capsule.
+One get_capsule_context call is sufficient.
 ```
 
 ---
@@ -92,6 +100,7 @@ Apply all? (yes/no/review each)
 - **"review each"** → Fall back to standard mode
 
 **Use batch mode when:**
+
 - Changes are mechanical (imports, renames, type additions)
 - All files are in allowed_paths
 - Risk is low (no logic changes)
@@ -109,6 +118,7 @@ Before proceeding to next change:
 - [ ] No unintended side effects
 
 **If validation fails:**
+
 ```
 ⚠️ Validation issue: [description]
 
@@ -136,6 +146,7 @@ Continue to Step [N+1]? (yes/no)
 ```
 
 **Report progress:**
+
 ```
 Call report_capsule_progress:
 - session_id, capsule_id
@@ -161,6 +172,7 @@ Call report_capsule_progress:
 ```
 
 **Report to user:**
+
 ```
 ✅ Implementation complete!
 
@@ -181,24 +193,26 @@ Session: [session_id]
 
 ### Tools Used
 
-| Tool | When |
-|------|------|
-| `get_session` | Start - find session |
-| `get_task_plan` | Start - load plan |
-| `get_capsule_context` | Start - load guardrails |
-| `checkAction` | Before file changes (optional) |
-| `report_capsule_progress` | After steps + at end |
-| `read_lints` | After each change |
+| Tool                      | When                                                           |
+| ------------------------- | -------------------------------------------------------------- |
+| `get_session`             | Start - find session, extract capsule_id from linked_capsules  |
+| `get_task_plan`           | Start - load plan                                              |
+| `get_capsule_context`     | Start - load guardrails (session_id + capsule_id from session) |
+| `checkAction`             | Before file changes (optional)                                 |
+| `report_capsule_progress` | After steps + at end                                           |
+| `read_lints`              | After each change                                              |
+
+Do NOT use `get_project_capsules`.
 
 ### Error Recovery
 
-| Error | Action |
-|-------|--------|
-| No preferences | `/recon-setup` |
-| No session/plan | `/recon-manager` |
-| Forbidden path | Stop, ask user |
-| Linter fail | Fix before continue |
-| User rejects | Ask what to adjust |
+| Error           | Action              |
+| --------------- | ------------------- |
+| No preferences  | `/recon-setup`      |
+| No session/plan | `/recon-manager`    |
+| Forbidden path  | Stop, ask user      |
+| Linter fail     | Fix before continue |
+| User rejects    | Ask what to adjust  |
 
 ---
 
