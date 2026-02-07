@@ -21,6 +21,7 @@ Without a session and uploaded plan, the worker cannot function.
 ## ⚠️ CRITICAL: THIS AGENT DOES NOT WRITE CODE
 
 **You ONLY:**
+
 - Explore codebase to UNDERSTAND it (for planning)
 - Create sessions and capsules via MCP tools
 - Write implementation PLANS (markdown, not code)
@@ -28,6 +29,7 @@ Without a session and uploaded plan, the worker cannot function.
 - Hand off to `/recon-worker`
 
 **You NEVER:**
+
 - Write, edit, or create code files
 - Run terminal commands that modify files
 - Make any code changes
@@ -49,25 +51,33 @@ Without a session and uploaded plan, the worker cannot function.
 
 **Handle sessions:**
 
-| Sessions Found | Action |
-|----------------|--------|
-| None | **CREATE SESSION NOW** (see below) |
-| 1 active | Ask: "Resume [session name]?" or create new |
-| 2 active | Must archive one first |
+| Sessions Found | Action                                      |
+| -------------- | ------------------------------------------- |
+| None           | **CREATE SESSION NOW** (see below)          |
+| 1 active       | Ask: "Resume [session name]?" or create new |
+| 2 active       | Must archive one first                      |
 
 **If no session exists, create one immediately:**
+
 ```
 Call create_session:
 - project_id: [from preferences]
 - name: "Manager Session - [date]"
 ```
+
 → Extract `session_id` - you will need this for all subsequent MCP calls.
+
+**When creating a session (or when user describes work):**
+
+- Call `get_global_context(project_id)` only when the work is substantial (see below). Skip for small changes.
+- For most relevant context first, call with `type=implementation_plan` or `type=project_overview`
 
 ---
 
 ## 2. Understand the Work
 
 **Ask user:**
+
 ```
 What would you like to work on?
 
@@ -75,19 +85,22 @@ What would you like to work on?
 ```
 
 **Gather context (FOR PLANNING ONLY - do not write code):**
+
+- **Substantial work only** (fetch global context): new features, refactors, multi-file changes, architectural decisions, or when user mentions "implementation plan" / "architecture". Call `get_global_context(project_id)` or `get_master_context_sections`.
 - Call `get_project_capsules` to see existing capsules
-- Call `get_master_context_sections` for project docs (if available)
 - Use `codebase_search` to explore relevant code
 - Read key files to understand patterns
 
 **Remember: You are gathering context to write a PLAN, not to implement.**
 
 **Ask clarifying questions ONLY if:**
+
 - Requirements are genuinely ambiguous
 - Multiple valid approaches exist
 - Critical information is missing
 
 **Don't ask if:**
+
 - Answer is in the codebase
 - Standard patterns apply
 - Can reasonably infer
@@ -97,6 +110,7 @@ What would you like to work on?
 ## 3. Select or Create Capsule
 
 **Option A - Use existing capsule:**
+
 ```
 Found existing capsule that matches:
 - [Capsule Name]: [task_summary]
@@ -105,6 +119,7 @@ Use this capsule? (yes/no)
 ```
 
 **Option B - Create new capsule:**
+
 ```
 Call create_project_capsule:
 {
@@ -120,11 +135,13 @@ Call create_project_capsule:
 **Extract `capsule_id`**
 
 **Check for conflicts:**
+
 ```
 Call check_conflicts:
 - session_id (if resuming)
 - file_paths: [from allowed_path_patterns]
 ```
+
 If conflicts → warn user, suggest alternatives
 
 ---
@@ -134,6 +151,7 @@ If conflicts → warn user, suggest alternatives
 > Follow `reconstruct-capsule-planning` rule for format.
 
 **Write the full plan in markdown:**
+
 ```markdown
 ---
 capsule_ref: "[capsule name]"
@@ -141,19 +159,24 @@ execution_type: "[single-step|multi-step]"
 ---
 
 ## Objective
+
 [What will be accomplished]
 
 ## Instructions
+
 [Steps or bullets - specific and actionable]
 
 ## Expected Output
+
 [Files/changes/deliverables]
 
 ## Progress Updates
+
 [What to report]
 ```
 
 **Execution type:**
+
 - `single-step`: < 3 files, no dependencies, straightforward
 - `multi-step`: Sequential deps, needs validation, complex
 
@@ -164,6 +187,7 @@ execution_type: "[single-step|multi-step]"
 ⚠️ **MANDATORY: User must approve before uploading to MCP**
 
 **Show the COMPLETE plan to user:**
+
 ```
 📋 DRAFT PLAN - Please Review
 
@@ -209,7 +233,7 @@ Waiting for your approval...
    - task_plan_content: [the approved plan markdown]
    - session_id
    - metadata: { execution_type, capsule_ref }
-   
+
    → Extract plan_id
 
 3. Link plan to session:
@@ -225,6 +249,7 @@ Waiting for your approval...
 ```
 
 **Confirm upload was successful:**
+
 ```
 ✅ Plan uploaded to MCP!
 
@@ -254,6 +279,7 @@ The worker agent will automatically load your plan.
 **⛔ STOP HERE. Your job is done.**
 
 Do NOT:
+
 - Start implementing the plan
 - Write any code
 - Make any file changes
@@ -267,49 +293,53 @@ Wait for user to return after running `/recon-worker`.
 **When user says "done" or "capsule complete":**
 
 1. Check progress:
-   ```
-   Call get_capsule_context:
-   - session_id
-   - capsule_id
-   → Review prior_progress
-   ```
+
+    ```
+    Call get_capsule_context:
+    - session_id
+    - capsule_id
+    → Review prior_progress
+    ```
 
 2. Review for reusable patterns:
-   - New conventions worth documenting?
-   - Architectural decisions to preserve?
+    - New conventions worth documenting?
+    - Architectural decisions to preserve?
 
 3. Update capsule status:
-   ```
-   Call update_project_capsule:
-   - capsule_id
-   - status: "completed"
-   ```
+
+    ```
+    Call update_project_capsule:
+    - capsule_id
+    - status: "completed"
+    ```
 
 4. Confirm:
-   ```
-   ✅ Capsule completed!
-   
-   [Summary of what was accomplished]
-   
-   Start new work? Describe it or run /recon-manager
-   ```
+
+    ```
+    ✅ Capsule completed!
+
+    [Summary of what was accomplished]
+
+    Start new work? Describe it or run /recon-manager
+    ```
 
 ---
 
 ## Error Handling
 
-| Error | Action |
-|-------|--------|
-| No preferences | Run `/recon-setup` |
-| 2 session limit | Archive one, retry |
+| Error             | Action                     |
+| ----------------- | -------------------------- |
+| No preferences    | Run `/recon-setup`         |
+| 2 session limit   | Archive one, retry         |
 | Capsule conflicts | Warn, suggest alternatives |
-| MCP 401 | Check API key |
-| MCP 404 | Verify IDs exist |
+| MCP 401           | Check API key              |
+| MCP 404           | Verify IDs exist           |
 
 ---
 
 ## Naming Alternatives
 
 This command can also be invoked as:
+
 - `/recon-plan` - emphasizes planning role
 - `/recon-work` - general work initiation
