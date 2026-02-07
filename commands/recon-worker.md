@@ -145,7 +145,7 @@ Validation: [pass/issues]
 Continue to Step [N+1]? (yes/no)
 ```
 
-**Report progress:**
+**Report progress (MUST call after each step):**
 
 ```
 Call report_capsule_progress:
@@ -168,8 +168,13 @@ Call report_capsule_progress:
 - status: "completed"
 - summary: "[full summary]"
 - files_modified: [all files]
-- learnings: [patterns discovered, if any]
+- learnings: [patterns, conventions, decisions discovered] — REQUIRED. Orchestrator uses these to update project context.
 ```
+
+**Learnings (required):**
+
+- Examples: "Used existing Button component", "API follows REST conventions from /api/auth", "State managed via Context"
+- Fallback: if none obvious, use summary-derived learning, e.g. "Completed [feature]: [brief summary]"
 
 **Report to user:**
 
@@ -199,7 +204,7 @@ Session: [session_id]
 | `get_task_plan`           | Start - load plan                                              |
 | `get_capsule_context`     | Start - load guardrails (session_id + capsule_id from session) |
 | `checkAction`             | Before file changes (optional)                                 |
-| `report_capsule_progress` | After steps + at end                                           |
+| `report_capsule_progress` | After steps + at end (completion must include `learnings`)     |
 | `read_lints`              | After each change                                              |
 
 Do NOT use `get_project_capsules`.

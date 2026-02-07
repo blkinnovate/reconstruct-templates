@@ -313,7 +313,11 @@ Wait for user to return after running `/recon-worker`.
     - status: "completed"
     ```
 
-4. Confirm:
+4. If session work is complete (all capsules done), either archive the session (`archive_session`) or update session status to completed (`update_session` with status: 'completed'). Both trigger the orchestrator to consolidate learnings.
+
+    > Orchestrator triggers: `archive_session` and `update_session(status: 'completed')` both run `onSessionComplete`.
+
+5. Confirm:
 
     ```
     ✅ Capsule completed!
