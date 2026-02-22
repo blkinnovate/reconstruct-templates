@@ -26,6 +26,7 @@ Get help with Reconstruct workflow.
 | Command | Purpose |
 |---------|---------|
 | `/recon-setup` | Connect workspace to project (one-time) |
+| `/recon-seed` | Onboarding: seed Context Cloud with project knowledge |
 | `/recon-manager` | Manager agent: plan work, create capsules |
 | `/recon-worker` | Worker agent: execute plans |
 | `/recon-help` | This help |
@@ -34,10 +35,11 @@ Get help with Reconstruct workflow.
 
 ```
 1. /recon-setup      → Connect project (once)
-2. /recon-manager    → Describe work, create capsule + plan
-3. Open new chat
-4. /recon-worker     → Execute the plan
-5. Return to manager chat, say "done"
+2. /recon-seed       → (Optional) Seed Context Cloud with project knowledge
+3. /recon-manager    → Describe work, create capsule + plan
+4. Open new chat
+5. /recon-worker     → Execute the plan
+6. Return to manager chat, say "done"
 ```
 
 ---
@@ -77,12 +79,13 @@ Reconstruct helps you work with AI agents on coding projects with guardrails and
 
 ```
 Step 1: Run /recon-setup to connect your project
-Step 2: Run /recon-manager and describe some work
-Step 3: The manager will create a capsule and plan
-Step 4: Open a new chat window
-Step 5: Run /recon-worker to execute
-Step 6: Approve each change as it's made
-Step 7: Return to manager when done
+Step 2: (Optional) Run /recon-seed to seed project context
+Step 3: Run /recon-manager and describe some work
+Step 4: The manager will create a capsule and plan
+Step 5: Open a new chat window
+Step 6: Run /recon-worker to execute
+Step 7: Approve each change as it's made
+Step 8: Return to manager when done
 ```
 
 **Ready?** Run `/recon-setup` to begin!
@@ -94,6 +97,12 @@ Step 7: Return to manager when done
 **If user said `/recon-help [topic]`:**
 
 ### Topics
+
+**seed** - Onboarding flow for Context Cloud:
+- Run `/recon-seed` to populate project context via Q&A rounds and repo scan
+- Works for first-time seed or re-seed (update existing)
+- User approval required before any write to cloud
+- See recon-seed command for prompts and synthesis rules
 
 **capsules** - Capsules define work scope:
 - `allowed_path_patterns` - Where agent CAN work
