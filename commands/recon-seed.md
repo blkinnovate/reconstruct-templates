@@ -7,7 +7,7 @@ version: v0.1
 
 # recon-seed
 
-Local-first onboarding that seeds the Context Cloud. Runs question rounds, deep repo scan, synthesis—writes to project_context only with user approval.
+Local-first onboarding that seeds the Context Cloud. Default to scan-first inference, ask only essential questions when the repo/docs cannot answer them with high confidence, then present a seeded context draft for approval.
 
 ---
 
@@ -22,22 +22,33 @@ Local-first onboarding that seeds the Context Cloud. Runs question rounds, deep 
 
 ## Flow
 
-1. **Rounds** – Round 1: purpose, goals. Round 2: tech stack, architecture. Round 3: conventions, constraints. Round 4: validation + approval checkpoint.
-2. **Scan** – README, docs, package.json, tsconfig, key dirs (see Scan List below).
-3. **Synthesis** – Combine Q&A + scan into sections. High-confidence only. Present for approval.
-4. **Seed** – Write approved sections via MCP. User approval required before each write.
+1. **Scan first** – README, docs, package.json, tsconfig, key dirs, configs, and stable entry points (see Scan List below).
+2. **Draft inferred sections** – Generate high-confidence seeded context from code/docs/config alone.
+3. **Ask only essential questions** – Ask a small set of follow-up questions only for material gaps, ambiguity, or business rules that are not inferable with high confidence.
+4. **Synthesis** – Merge repo evidence + user answers into final sections. Present for approval.
+5. **Seed** – Write approved seeded context only through the correct seeded context path. Never use task-plan storage as a substitute.
 
 ---
 
-## Round Prompts
+## Essential Questions Only
 
-**Round 1 (Purpose, goals, current state):** What is the purpose? Main goals? Current state? Primary users/stakeholders? → `project_overview`
+Ask questions only when the answer materially changes seeded context and cannot be inferred from the repo/docs with high confidence.
 
-**Round 2 (Tech stack, architecture, patterns):** Technologies/frameworks? Architecture (monolith, microservices)? Patterns (state, API, testing)? Key libraries? → `tech_stack`, `architecture`
+Good reasons to ask:
+- Core business rules or invariants are unclear
+- Primary users/stakeholders are not visible from the code/docs
+- Sensitive or off-limits areas are not documented in the repo
+- Docs and implementation conflict in a way that changes the seed
+- Team-specific conventions are not inferable from the codebase
 
-**Round 3 (Conventions, constraints, off-limits):** Coding conventions? Constraints? Off-limits/deprecated? Team preferences? → `code_conventions`
+Do not ask when:
+- Stack, structure, and conventions are already visible in code/config/docs
+- The answer would just confirm something already strongly evidenced
+- The uncertainty is minor and can simply be omitted
 
-**Round 4 (Validation):** Summarize in bullet list. "Approve to continue to repo scan?" Wait for approval before scan.
+Target:
+- `quick`: zero interview questions
+- `deep`: usually 2-4 essential questions total, not large batches
 
 ---
 
@@ -52,6 +63,11 @@ Local-first onboarding that seeds the Context Cloud. Runs question rounds, deep 
 | Key dirs (src/, app/, lib/, etc.)            | Structure, entry points                 |
 | .cursor/                                     | Cursor rules, project-specific config   |
 | Config files (eslint, prettier, etc.)        | Conventions                             |
+
+Also use:
+- package scripts / lockfile for workflow clues
+- API routes and migrations for architecture and data boundaries
+- recent git history only if it reveals stable decisions, not transient churn
 
 Use `file_structure` for folder org and key paths.
 
@@ -76,18 +92,35 @@ Use `file_structure` for folder org and key paths.
 2. **Combine Q&A + scan** – Merge user answers with scan. Resolve conflicts in favor of user input.
 3. **Present before write** – Get approval before any MCP write.
 4. **Omit uncertain** – When in doubt, leave it out.
+5. **Inference-first** – If the repo provides high-confidence evidence, include it without asking.
+6. **Essential questions only** – Keep follow-up questions minimal and tied to real gaps.
 
 ---
 
 ## MCP Write
 
-**Current state:** `store_context_section` MCP tool does not exist. Workaround: use `store_task_plan` for implementation plans only, or note sections for manual entry. When added, use for: `project_overview`, `architecture`, `tech_stack`, `code_conventions`, `file_structure`, `decisions`. Valid types as above. `source_type`: "manual" (from Q&A) or "imported" (from scan).
+Use `create_context_section` for approved seeded context writes.
+
+Required fields:
+- `project_id`
+- `type`
+- `title`
+- `content`
+
+Recommended fields for seeding:
+- `tags: ["seeded"]`
+- `source_type: "seeded"`
+- `git_integration_id` or `repo_slug` when repo-scoped context is known
+
+Never use `store_task_plan` as a substitute for seeded context. Task plans are not seeded project context and pollute the wrong workflow.
+
+If `create_context_section` is unavailable in the current environment, stop after producing the draft and tell the user plainly that seeded writes are unavailable instead of routing through another tool.
 
 ---
 
 ## Approval Checkpoints
 
-- After Round 4: "Approve to continue to repo scan?"
+- After scan + inferred draft: "Approve this draft / answer essential questions?"
 - After Synthesis: "Approve to write to cloud?"
 - Before each write: user must approve
 

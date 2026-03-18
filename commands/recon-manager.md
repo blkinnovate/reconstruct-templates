@@ -1,8 +1,8 @@
 ---
 priority: 1
 command_name: recon-manager
-description: "Manager agent: create capsules, plan work, coordinate implementation"
-version: v0.3
+description: "Manager agent: check notifications, create capsules, plan work, coordinate implementation"
+version: v0.4
 aliases: [recon-plan, recon-work]
 ---
 
@@ -39,15 +39,30 @@ Without a session and uploaded plan, the worker cannot function.
 
 ---
 
-## 1. Prerequisites + Session Setup
+## 1. Prerequisites + Notification Check + Session Setup
 
 ```
 1. Read .reconstruct/preferences.json → project_id
    - Missing? → "Run /recon-setup first"
 
-2. Call get_session with project_id
+2. Call get_notifications with project_id BEFORE anything else
+   - If pending notifications exist:
+     - Show them first
+     - Ask whether to handle them now before planning new work
+   - If none exist:
+     - State that there are no pending project notifications
+
+3. Call get_session with project_id
    - MCP fails? → "❌ MCP not connected. Run /recon-setup"
 ```
+
+**Notification handling rule:**
+
+- This is **Step 0** for every manager run.
+- Check notifications at the start of every `/recon-manager` session before capsule planning.
+- Surface pending clarification questions and notifications succinctly.
+- If the user wants to answer them, do that first.
+- `recon-worker` does **not** do this; manager owns the inbox check.
 
 **Handle sessions:**
 
