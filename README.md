@@ -14,6 +14,7 @@ reconstruct-templates/
 │   ├── recon-setup.md                 # One-time project setup + tutorial
 │   ├── recon-manager.md               # Manager agent: plan work, create capsules
 │   ├── recon-worker.md                # Worker agent: execute plans
+│   ├── recon-seed.md                  # Seed codebase into context
 │   └── recon-help.md                  # Tutorial and reference
 ├── rules/                             # Cursor rule files
 │   ├── reconstruct-capsule-planning.md   # Plan format and creation
@@ -30,6 +31,7 @@ reconstruct-templates/
 | `/recon-setup` | Connect workspace to project (run once) |
 | `/recon-manager` | Manager agent: create capsules, plan work |
 | `/recon-worker` | Worker agent: execute plans with human approval |
+| `/recon-seed` | Seed codebase into context and sync |
 | `/recon-help` | Tutorial and quick reference |
 
 ## Rules
@@ -61,7 +63,7 @@ reconstruct init
 
 ## Versioning
 
-Templates are versioned independently from the CLI. Current version: **v0.4**
+Templates are versioned independently from the CLI. Current version: **v0.5**
 
 Each release includes:
 - Command files with version headers
