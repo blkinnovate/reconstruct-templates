@@ -2,7 +2,7 @@
 priority: 5
 command_name: recon-help
 description: "Tutorial and quick reference for Reconstruct workflow"
-version: v0.3
+version: v0.4
 ---
 
 # Reconstruct Help
@@ -29,6 +29,7 @@ Get help with Reconstruct workflow.
 | `/recon-seed` | Onboarding: seed Context Cloud with project knowledge |
 | `/recon-manager` | Manager agent: plan work, create capsules |
 | `/recon-worker` | Worker agent: execute plans |
+| `/recon-ask-constructor` | Generate capsule + plan via MCP `ask_constructor`, then create/store/link and execute |
 | `/recon-help` | This help |
 
 ### Typical Workflow
@@ -40,6 +41,48 @@ Get help with Reconstruct workflow.
 4. Open new chat
 5. /recon-worker     → Execute the plan
 6. Return to manager chat, say "done"
+```
+
+### Ways to Use Reconstruct
+
+Pick the workflow that matches the kind of work you’re doing.
+
+**0) Web app Constructor (interactive planning UI)**
+
+- Use when: you want to iteratively refine scope/guardrails/plan before any editor-side execution
+- Flow (typical): open Constructor in the Reconstruct web app → enter mission → review capsule + plan → approve/create → then execute in your editor via the worker flow
+- Relationship to editors: `/recon-ask-constructor` calls the MCP tool `ask_constructor` to generate a similar “task package” (capsule context + plan), but inside the editor
+
+**A) Standard (recommended for most work): Manager → Worker**
+
+- Use when: multi-file changes, risky refactors, anything where you want a clean handoff and tight scope control
+
+```
+/recon-manager  → creates capsule + stores plan + links session
+new chat
+/recon-worker   → executes the stored plan with approvals
+```
+
+**B) Single-chat shortcut: `/recon-ask-constructor`**
+
+- Use when: you want “generate plan + execute” in one chat for a focused task
+
+```
+/recon-ask-constructor <mission>
+```
+
+This command is intended to:
+
+- call `ask_constructor` to draft capsule + plan
+- convert it into a real capsule + stored plan linked to a session
+- immediately start executing the plan (worker-style) in the same chat after scope confirmation
+
+**C) Onboarding / knowledge base: `/recon-seed`**
+
+- Use when: first-time setup, new repo, or the agent needs durable project context
+
+```
+/recon-seed
 ```
 
 ---
@@ -126,7 +169,7 @@ Step 8: Return to manager when done
 - Content rules (patterns to follow)
 
 **errors** - Common issues:
-- "MCP not configured" → Check API key in Cursor settings
+- "MCP not configured" → Check API key / MCP configuration in your editor
 - "No session" → Run `/recon-manager` first
 - "2 session limit" → Archive an old session
 - See `/recon-help recovery` for more
